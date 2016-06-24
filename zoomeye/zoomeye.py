@@ -11,7 +11,7 @@ class ZoomEye():
         self.API_TOKEN = None
         self.url = 'https://api.zoomeye.org/user/login'
         self.user_name = "r00teer@163.com"
-        self.password = "hehe123456"
+        self.password = "123456"
         self.data = {
             "username": self.user_name,
             "password": self.password
