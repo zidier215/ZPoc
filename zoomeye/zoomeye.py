@@ -15,11 +15,11 @@ class ZoomEye():
             cls._inst = super(ZoomEye, cls).__new__(cls, *args, **kwargs)
         return cls._inst
 
-    def __init__(self):
+    def __init__(self,username,password):
         self.API_TOKEN = None
         self.url = 'https://api.zoomeye.org/user/login'
-        self.user_name = "r00teer@163.com"
-        self.password = "123456"
+        self.user_name = username
+        self.password = password
         self.data = {
             "username": self.user_name,
             "password": self.password
