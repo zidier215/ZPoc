@@ -13,7 +13,7 @@ import sys
 import os
 
 if __name__ == "__main__":
-    z = zoomeye.ZoomEye("r00teer@163.com", "gh0s1ter@zpt")
+    z = zoomeye.ZoomEye("fool@163.com", "123456")
     z.login()
     dork = ''
     port = 0
