@@ -9,13 +9,16 @@ import os
 import datetime
 import thread
 
+
 class ZoomEye():
+    # 实现单例模式，保证只有一个实例
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, '_inst'):
             cls._inst = super(ZoomEye, cls).__new__(cls, *args, **kwargs)
         return cls._inst
 
-    def __init__(self,username,password):
+    # 构造方法，完成成员变量初始化
+    def __init__(self, username, password):
         self.API_TOKEN = None
         self.url = 'https://api.zoomeye.org/user/login'
         self.user_name = username
@@ -24,17 +27,23 @@ class ZoomEye():
             "username": self.user_name,
             "password": self.password
         }
+        self.fname = ''
         self.post_data = json.dumps(self.data)
         self.port = ''
         self.facets = ''
         self.ip_list = []
         self.ip_queue = Queue.Queue(-1)
+
+    #实现登录模块
     def login(self):
-        token=self.load_token()
-        if token:
-            self.API_TOKEN=token
-        else:
-            self._login()
+        # token=self.load_token()
+        # if token:
+        #     self.API_TOKEN=token
+        # else:
+        #     self._login()
+        self._login()
+
+    #登录模块具体实现
     def _login(self):
         try:
             c = pycurl.Curl()
@@ -51,7 +60,7 @@ class ZoomEye():
             if b.getvalue():
                 print 'success login'
                 self.API_TOKEN = json.loads(b.getvalue())["access_token"]
-                self.save_token()
+                #self.save_token()
             else:
                 print 'success fail,get null result'
             print self.API_TOKEN
@@ -64,11 +73,12 @@ class ZoomEye():
             print e.message
             pass
 
-    def _search(self, port, page, facets):
-        self.port=port
-        self.facets=facets
+    #搜索模块实现
+    def _search(self, port, page, facets, poc_name):
+        self.port = port
+        self.facets = facets
         if page > 0:
-            for i in range(1, page + 1):
+            for i in range(1, int(page) + 1):
                 url = 'https://api.zoomeye.org/host/search?query="port:{}"&page={}&facets={}'.format(port, i, facets)
                 print '_get_url'
                 data = self._get_url(url)
@@ -77,13 +87,41 @@ class ZoomEye():
         else:
             print 'page not be <0'
             pass
-        thread.exit_thread()
+        #thread.exit_thread()
+        if self.fname and poc_name:
+            os.system('python pocsuite.py -r {} -f {}'.format(poc_name, self.fname))
+        else:
+            print 'args error'
 
-    def run_fast(self,port,page,facets):
+    #基于多线程的搜索模块
+    def run_fast(self, port, page, facets):
         for i in range(page):
-            thread.start_new_thread(self._search(port,page,facets),(i,i))
+            thread.start_new_thread(self._search(port, page, facets), (i, i))
 
+    #根据输入参数得到
+    def search_url(self, port, page, facets):
+        url = 'https://api.zoomeye.org/host/search?query='
+        flag = False
+        if port != 0:
+            url.join('"port:%s"' % port)
+            flag = True
+        if page:
+            if flag:
+                url.join('&page=%s' % page)
+            else:
+                url.join('page=%s' % page)
+            flag = True
+        else:
+            flag = False
+        if facets:
+            if flag:
+                url.join('&facets=%s' % facets)
+            else:
+                url.join('facets=%s' % facets)
 
+        return url
+
+    #封装的请求模块
     def _get_url(self, url):
         if self.API_TOKEN == None:
             print 'none token'
@@ -107,6 +145,7 @@ class ZoomEye():
             pass
         return result
 
+    #存储模块
     def _write_file(self):
         strs = ''
         for i in self.ip_list:
@@ -124,6 +163,7 @@ class ZoomEye():
                 break
 
         print 'write result 2 file {}'.format(file_name)
+        self.fname = file_name
         try:
             file = open(file_name, 'w')
             file.write(strs)
@@ -131,7 +171,7 @@ class ZoomEye():
         except IOError:
             print IOError
 
-
+    #解析json数据模块
     def _parse_json(self, jsondata):
         port = self.port
         facets = self.facets
@@ -174,9 +214,11 @@ class ZoomEye():
         now_time = datetime.datetime.now()
         try:
             path = os.getcwd()
-            file_name = '{}\\token.txt'.format(path)
+            #file_name = '{}\\token.txt'.format(path)
+            file_name = os.path.join(path, '\\token.txt')
+            write_s = os.path.join(token, '\n' + now_time)
             file = open(file_name, 'w')
-            write_s = '{}\n{}'.format(token, now_time)
+            #write_s = '{}\n{}'.format(token, now_time)
             file.write(write_s)
             file.close()
             print 'save token success'
@@ -186,19 +228,21 @@ class ZoomEye():
 
     @staticmethod
     def load_token():
-        last_time=datetime.datetime.now()
-        token=''
+        last_time = datetime.datetime.now()
+        token = ''
         try:
             path = os.getcwd()
-            file_name = '{}\\token.txt'.format(path)
+            file_name = os.path.join(path, '\\token.txt')
+            print file_name
             if os.path.exists(file_name):
                 file = open(file_name, 'r')
                 token = file.readline()
                 last_time = '{}'.format(file.readline())
-                last_time = datetime.datetime.strptime(last_time, '%Y-%m-%d %H:%M:%S')
-                now_time = datetime.datetime.now()
-                d = (now_time- last_time).days
-                if d.days <1 and token:
+                #last_time = datetime.datetime.strptime(last_time, '%Y-%m-%d %H:%M:%S')
+                #now_time = datetime.datetime.now()
+                #d = (now_time- last_time).days
+                #if d.days <1 and token:
+                if token:
                     return token
             else:
                 print 'token file not exits'
