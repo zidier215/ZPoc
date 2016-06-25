@@ -2,7 +2,6 @@ __author__ = 'MR.SJ'
 import zoomeye
 
 
-
 if __name__ == "__main__":
     z =zoomeye.ZoomEye()
     z._login()
