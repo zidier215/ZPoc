@@ -29,7 +29,12 @@ class ZoomEye():
         self.facets = ''
         self.ip_list = []
         self.ip_queue = Queue.Queue(-1)
-
+    def login(self):
+        token=self.load_token()
+        if token:
+            self.API_TOKEN=token
+        else:
+            self._login()
     def _login(self):
         try:
             c = pycurl.Curl()
@@ -75,9 +80,7 @@ class ZoomEye():
         thread.exit_thread()
 
     def run_fast(self,port,page,facets):
-        for i in range(3):
-
-
+        for i in range(page):
             thread.start_new_thread(self._search(port,page,facets),(i,i))
 
 
@@ -173,7 +176,7 @@ class ZoomEye():
             path = os.getcwd()
             file_name = '{}\\token.txt'.format(path)
             file = open(file_name, 'w')
-            write_s = '{}\\n{}'.format(token, now_time)
+            write_s = '{}\n{}'.format(token, now_time)
             file.write(write_s)
             file.close()
             print 'save token success'
@@ -183,7 +186,6 @@ class ZoomEye():
 
     @staticmethod
     def load_token():
-        z = ZoomEye()
         last_time=datetime.datetime.now()
         token=''
         try:
@@ -192,16 +194,17 @@ class ZoomEye():
             if os.path.exists(file_name):
                 file = open(file_name, 'r')
                 token = file.readline()
-                last_time = file.readline()
+                last_time = '{}'.format(file.readline())
+                last_time = datetime.datetime.strptime(last_time, '%Y-%m-%d %H:%M:%S')
+                now_time = datetime.datetime.now()
+                d = (now_time- last_time).days
+                if d.days <1 and token:
+                    return token
             else:
                 print 'token file not exits'
         except IOError:
             print IOError
+        except Exception:
+            print Exception
 
-        now_time = datetime.datetime.now()
-        d = now_time - last_time
-        if d.days <1 and token:
-            z.API_TOKEN = token
-        else:
-            z._login()
-        return z
+        return None
