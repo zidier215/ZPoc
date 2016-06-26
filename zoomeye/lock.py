@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#coding=utf8
 __author__ = 'MR.SJ'
 #####################################################
 # example:
@@ -13,7 +15,7 @@ import sys
 import os
 
 if __name__ == "__main__":
-    z = zoomeye.ZoomEye("fool@163.com", "123456")
+    z = zoomeye.ZoomEye("1064901069@qq.com", "wsx88619973@")
     z.login()
     dork = ''
     port = 0
