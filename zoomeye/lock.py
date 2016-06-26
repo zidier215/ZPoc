@@ -1,19 +1,21 @@
 __author__ = 'MR.SJ'
+#!/usr/bin/python2.7
+ # -*- coding: UTF-8 -*-
 #####################################################
 # example:
 #python lock.py -d app,os -p 1 -o 21 -r xxe.py
-#-d 指定dork组件
-#-p 指定页数
-#-o 指定端口
-#-r 指定poc
+#-d dork
+#-p page
+#-o port
+#-r poc
 ####################################################
-import zoomeye
 import getopt
 import sys
-import os
+import zoomeye
+
 
 if __name__ == "__main__":
-    z = zoomeye.ZoomEye("fool@163.com", "123456")
+    z = zoomeye.ZoomEye("username@163.com", "password")
     z.login()
     dork = ''
     port = 0
