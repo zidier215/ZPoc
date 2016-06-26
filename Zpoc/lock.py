@@ -17,11 +17,7 @@ import zoomeye
 
 
 if __name__ == "__main__":
-<<<<<<< 696cecc420f672d3aac387e37fc77035638f56f5:Zpoc/lock.py
-    z = zoomeye.ZoomEye("r00teer@163.com", "r00teer@zpt")
-=======
-    z = zoomeye.ZoomEye("1064901069@qq.com", "wsx88619973@")
->>>>>>> First push:zoomeye/lock.py
+    z = zoomeye.ZoomEye("r00teer@163.com", "r00teer@zpt", 0)
     z.login()
     dork = ''
     port = 0
