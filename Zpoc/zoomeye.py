@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#coding=utf8
 __author__ = 'MR.SJ'
 # !/usr/bin/python2.7
 # -*- coding: UTF-8 -*-
@@ -11,8 +13,56 @@ import os
 import datetime
 import thread
 import sys
+import logging
 
+_limit_time = datetime.timedelta(0,0,0,0,0,12,0)
+class _log_module():
+       def __init__(self, log_level=1, file_dst=None):
+           self.LEVEL = (logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL)
+           print self.LEVEL[log_level]   
+           self.zpoc_log = file_dst
+           self.log_level = log_level
+           self.write_fd = None 
+           # If the log file is not specify by User, Use Default path : ./log/zpoc_log_xxx,log
+           if self.zpoc_log is None:
+               tmp = os.path.join(os.getcwd(), 'log')
+               if not os.path.exists(tmp) :
+                   os.mkdir(tmp)
+               name_day = str(datetime.datetime.now())[:10]
+               self.zpoc_log = os.path.join(os.getcwd(), os.path.join('log', 'zpoc_log_{}.log'.format(name_day)))
+               if not os.path.exists(self.zpoc_log) :
+                   f = open(self.zpoc_log, 'w')
+                   f.close()
+           try:
+               # Config the logging Engine 
+               logging.basicConfig(filename=self.zpoc_log, level=self.LEVEL[log_level], format='[%(levelname)s](%(asctime)s) in %(filename)s:line %(lineno)d : %(message)s')
+           except Exception:
+               self.writefd = sys.stderr
+               print 'Open Log file Fail!'
+       
+       def clear(self):
+           with open(self.zpoc_log, 'w') as target:
+               pass
 
+       @staticmethod
+       # Default Logging For INFO Level
+       def log(message):
+           logging.info(message)
+
+       @staticmethod
+       def log_level(message, level=1):
+           if level is 1:
+               logging.info(message)
+           elif level is 0:
+               logging.debug(message)
+           elif level is 2:
+               logging.warning(message)
+           elif level is 3:
+               logging.error(message)
+           else:
+               logging.critical(message)
+    
+       
 class ZoomEye():
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, '_inst'):
@@ -35,15 +85,17 @@ class ZoomEye():
         self.facets = ''
         self.ip_list = []
         self.ip_queue = Queue.Queue(-1)
+        # logging The Message
+        logs = _log_module()
 
 
     def login(self):
-        # token=self.load_token()
-        # if token:
-        #     self.API_TOKEN=token
-        # else:
-        #     self._login()
-        self._login()
+        token=self.load_token()
+        if token:
+            self.API_TOKEN=token
+        else:
+            self._login()
+        return
 
 
     def _login(self):
@@ -62,7 +114,7 @@ class ZoomEye():
             if b.getvalue():
                 print 'success login'
                 self.API_TOKEN = json.loads(b.getvalue())["access_token"]
-                #self.save_token()
+                self.save_token()
             else:
                 print 'success fail,get null result'
             print self.API_TOKEN
@@ -158,14 +210,17 @@ class ZoomEye():
         for i in self.ip_list:
             ip = '{}\n'.format(i)
             strs = strs + ip
-        r = random.randrange(1, 100000)
+        r = str(datetime.datetime.now()).replace(' ', '-') 
+        #r = random.randrange(1, 100000)
         path = os.getcwd()
-        file_name = '{}\\{}_{}.txt'.format(path, self.facets, r)
+        file_name = os.path.join(path, str(self.facets)+'_'+str(r)+'.txt')
+        #file_name = '{}\\{}_{}.txt'.format(path, self.facets, r)
         print file_name
         while True:
             if os.path.exists("{}".format(file_name)):
                 r = random.randrange(1, 100000)
-                file_name = '{}\\{}_{}.txt'.format(path, self.facets, r)
+                file_name = os.path.join(path, str(self.facets)+'_'+str(r)+'.txt')
+                #file_name = '{}\\{}_{}.txt'.format(path, self.facets, r)
             else:
                 break
 
@@ -197,7 +252,7 @@ class ZoomEye():
                                 result['ip'] = host['ip']
                             self.ip_list.append(result['ip'])
                         else:
-                            print 'just go wrong'
+                            print '[WARN] {} >> just go wrong'.format(datetime.datetime.now())
                     if facets:
                         for facet in data['facets']:
                             if host.has_key(facet):
@@ -212,7 +267,7 @@ class ZoomEye():
                                     result[facet] = ""
 
             else:
-                print 'url is error'
+                print '[WARN] {} >> url is error << in {}'.format(datetime.datetime.now())
         except Exception:
             print Exception
 
@@ -222,35 +277,38 @@ class ZoomEye():
         try:
             path = os.getcwd()
             #file_name = '{}\\token.txt'.format(path)
-            file_name = os.path.join(path, '\\token.txt')
-            write_s = os.path.join(token, '\n' + now_time)
+            file_name = os.path.join(path, 'token.txt')
+            write_s = write_s = '{}\n{}'.format(now_time, token) # time before token
             file = open(file_name, 'w')
             #write_s = '{}\n{}'.format(token, now_time)
             file.write(write_s)
             file.close()
-            print 'save token success'
+            print '[INFO] {} : save token success'.format(datetime.datetime.now())
         except IOError:
-            print 'save token fail'
+            print '[ERROR] {} >>> save token fail'.format(datetime.datetime.now())
             print IOError
-
+    
     @staticmethod
     def load_token():
-        last_time = datetime.datetime.now()
+        now_time = datetime.datetime.now()
         token = ''
         try:
             path = os.getcwd()
-            file_name = os.path.join(path, '\\token.txt')
-            print file_name
+            file_name = os.path.join(path, 'token.txt')
             if os.path.exists(file_name):
                 file = open(file_name, 'r')
+                last_time_t = '{}'.format(file.readline()).strip() # Clear the space or \n
                 token = file.readline()
-                last_time = '{}'.format(file.readline())
-                #last_time = datetime.datetime.strptime(last_time, '%Y-%m-%d %H:%M:%S')
+                try:
+                    last_time = datetime.datetime.strptime(last_time_t, '%Y-%m-%d %H:%M:%S.%f')
+                except Exception:
+                    last_time = datetime.datetime.strptime(last_time_t, '%Y-%m-%d %H:%M:%S')
                 #now_time = datetime.datetime.now()
                 #d = (now_time- last_time).days
                 #if d.days <1 and token:
-                if token:
-                    return token
+                if token :
+                    if ((now_time - last_time) < _limit_time) : #_limit_time is in the top of this file
+                        return token
             else:
                 print 'token file not exits'
         except IOError:
