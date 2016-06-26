@@ -1,6 +1,7 @@
-__author__ = 'MR.SJ'
 #!/usr/bin/python2.7
- # -*- coding: UTF-8 -*-
+# -*- coding: UTF-8 -*-
+__author__ = 'MR.SJ'
+
 #####################################################
 # example:
 #python lock.py -d app,os -p 1 -o 21 -r xxe.py
@@ -15,7 +16,7 @@ import zoomeye
 
 
 if __name__ == "__main__":
-    z = zoomeye.ZoomEye("r00teer@163.com", "r00teer@zpt")
+    z = zoomeye.ZoomEye("1064901069@qq.com", "wsx88619973@", 0)
     z.login()
     dork = ''
     port = 0
@@ -39,5 +40,6 @@ if __name__ == "__main__":
             -r  poc_file
             '''
             sys.exit()
+    print port, page, dork, poc_name
     z._search(port, page, dork, poc_name)
 
