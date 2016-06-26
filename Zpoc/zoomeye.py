@@ -157,8 +157,10 @@ class ZoomEye():
     def _get_search_url(self, port, page, facets):
         url = 'https://api.zoomeye.org/host/search?query='
         flag = False
-        if port and facets:
-            print 'port or facets cant null'
+        logging.debug('port:{}, facets:{}'.format(port, facets))
+        if not port and not facets:
+            logging.warning('port or facets cant null')
+            #print 'port or facets cant null'
             sys.exit()
         if port != 0:
             url = '{}{}'.format(url, '"port:%s"' % port)
@@ -176,7 +178,8 @@ class ZoomEye():
                 url = '{}{}'.format(url, '&facets=%s' % facets)
             else:
                 url = '{}{}'.format(url, 'facets=%s' % facets)
-        print url
+        logging.debug(url)        
+        #print url
         return url
 
 

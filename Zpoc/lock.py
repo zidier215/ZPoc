@@ -16,7 +16,7 @@ import zoomeye
 
 
 if __name__ == "__main__":
-    z = zoomeye.ZoomEye("r00teer@163.com", "r00teer@zpt", 0)
+    z = zoomeye.ZoomEye("1064901069@qq.com", "wsx88619973@", 0)
     z.login()
     dork = ''
     port = 0
@@ -40,5 +40,6 @@ if __name__ == "__main__":
             -r  poc_file
             '''
             sys.exit()
+    print port, page, dork, poc_name
     z._search(port, page, dork, poc_name)
 
