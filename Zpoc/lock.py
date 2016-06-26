@@ -1,8 +1,7 @@
-#!/usr/bin/python
-#coding=utf8
-__author__ = 'MR.SJ'
 #!/usr/bin/python2.7
- # -*- coding: UTF-8 -*-
+# -*- coding: UTF-8 -*-
+__author__ = 'MR.SJ'
+
 #####################################################
 # example:
 #python lock.py -d app,os -p 1 -o 21 -r xxe.py

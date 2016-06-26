@@ -12,57 +12,7 @@ import Queue
 import os
 import datetime
 import thread
-<<<<<<< HEAD:Zpoc/zoomeye.py
 import sys
-import logging
-
-_limit_time = datetime.timedelta(0,0,0,0,0,12,0)
-class _log_module():
-       def __init__(self, log_level=1, file_dst=None):
-           self.LEVEL = (logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL)
-           print self.LEVEL[log_level]   
-           self.zpoc_log = file_dst
-           self.log_level = log_level
-           self.write_fd = None 
-           # If the log file is not specify by User, Use Default path : ./log/zpoc_log_xxx,log
-           if self.zpoc_log is None:
-               tmp = os.path.join(os.getcwd(), 'log')
-               if not os.path.exists(tmp) :
-                   os.mkdir(tmp)
-               name_day = str(datetime.datetime.now())[:10]
-               self.zpoc_log = os.path.join(os.getcwd(), os.path.join('log', 'zpoc_log_{}.log'.format(name_day)))
-               if not os.path.exists(self.zpoc_log) :
-                   f = open(self.zpoc_log, 'w')
-                   f.close()
-           try:
-               # Config the logging Engine 
-               logging.basicConfig(filename=self.zpoc_log, level=self.LEVEL[log_level], format='[%(levelname)s](%(asctime)s) in %(filename)s:line %(lineno)d : %(message)s')
-           except Exception:
-               self.writefd = sys.stderr
-               print 'Open Log file Fail!'
-       
-       def clear(self):
-           with open(self.zpoc_log, 'w') as target:
-               pass
-
-       @staticmethod
-       # Default Logging For INFO Level
-       def log(message):
-           logging.info(message)
-
-       @staticmethod
-       def log_level(message, level=1):
-           if level is 1:
-               logging.info(message)
-           elif level is 0:
-               logging.debug(message)
-           elif level is 2:
-               logging.warning(message)
-           elif level is 3:
-               logging.error(message)
-           else:
-               logging.critical(message)
-=======
 import logging
 
 _limit_time = datetime.timedelta(0,0,0,0,0,12,0)
@@ -101,23 +51,15 @@ class _log_module():
        def clear(self):
            with open(self.zpoc_log, 'w') as target:
                pass
-
->>>>>>> master:zoomeye/zoomeye.py
-    
-       
+        
 class ZoomEye():
     def __new__(cls, *args, **kwargs):
         if not hasattr(cls, '_inst'):
             cls._inst = super(ZoomEye, cls).__new__(cls, *args, **kwargs)
         return cls._inst
 
-<<<<<<< HEAD:Zpoc/zoomeye.py
-
-    def __init__(self, username, password):
-=======
     # 构造方法，完成成员变量初始化
     def __init__(self, username, password, log_levels=1):
->>>>>>> master:zoomeye/zoomeye.py
         self.API_TOKEN = None
         self.url = 'https://api.zoomeye.org/user/login'
         self.user_name = username
@@ -132,14 +74,8 @@ class ZoomEye():
         self.facets = ''
         self.ip_list = []
         self.ip_queue = Queue.Queue(-1)
-<<<<<<< HEAD:Zpoc/zoomeye.py
-        # logging The Message
-        logs = _log_module()
-
-=======
         # logging The Message, Depend by the Singleton of the ZoomEye() !!!
         self.logs = _log_module(log_levels)
->>>>>>> master:zoomeye/zoomeye.py
 
     def login(self):
         token=self.load_token()
@@ -148,10 +84,6 @@ class ZoomEye():
         else:
             self._login()
         return
-<<<<<<< HEAD:Zpoc/zoomeye.py
-
-=======
->>>>>>> master:zoomeye/zoomeye.py
 
     def _login(self):
         try:
@@ -194,16 +126,11 @@ class ZoomEye():
         self.facets = facets
         if page > 0:
             for i in range(1, int(page) + 1):
-<<<<<<< HEAD:Zpoc/zoomeye.py
                 #url = 'https://api.zoomeye.org/host/search?query="port:{}"&page={}&facets={}'.format(port, i, facets)
                 url = self._get_search_url(port, page, facets)
                 url = '{}{}'.format(url,'&page=%s'%i)
+                logging.debug('_get_url')
                 print '_get_url'
-=======
-                url = 'https://api.zoomeye.org/host/search?query="port:{}"&page={}&facets={}'.format(port, i, facets)
-                logging.debug('_get_url') # 0 for DEBUG level
-                #print '_get_url'
->>>>>>> master:zoomeye/zoomeye.py
                 data = self._get_url(url)
                 self._parse_json(data)
             self._write_file()
@@ -213,15 +140,10 @@ class ZoomEye():
             pass
         #thread.exit_thread()
         if self.fname and poc_name:
-<<<<<<< HEAD:Zpoc/zoomeye.py
-            os.system('python ../pocsuite.py -r {} -f {}'.format(poc_name, self.fname))
-=======
             try:
                 os.system('python pocsuite.py -r {} -f {}'.format(poc_name, self.fname))
             except Exception as e:
-                logging.error(e.message) # 3 For ERROR level
-            
->>>>>>> master:zoomeye/zoomeye.py
+                logging.error(e.message) # 3 For ERROR level            
         else:
             logging.error('args error') # 3 For ERROR level
             #print 'args error'
@@ -296,12 +218,8 @@ class ZoomEye():
         path = os.getcwd()
         file_name = os.path.join(path, str(self.facets)+'_'+str(r)+'.txt')
         #file_name = '{}\\{}_{}.txt'.format(path, self.facets, r)
-<<<<<<< HEAD:Zpoc/zoomeye.py
-        print file_name
-=======
         logging.debug(file_name)
         #print file_name
->>>>>>> master:zoomeye/zoomeye.py
         while True:
             if os.path.exists("{}".format(file_name)):
                 r = random.randrange(1, 100000)
@@ -339,12 +257,8 @@ class ZoomEye():
                                 result['ip'] = host['ip']
                             self.ip_list.append(result['ip'])
                         else:
-<<<<<<< HEAD:Zpoc/zoomeye.py
-                            print '[WARN] {} >> just go wrong'.format(datetime.datetime.now())
-=======
                             logging.warning('just go wrong') # 2 For WARNING level
                             #print 'just go wrong'
->>>>>>> master:zoomeye/zoomeye.py
                     if facets:
                         for facet in data['facets']:
                             if host.has_key(facet):
@@ -359,16 +273,10 @@ class ZoomEye():
                                     result[facet] = ""
 
             else:
-<<<<<<< HEAD:Zpoc/zoomeye.py
-                print '[WARN] {} >> url is error << in {}'.format(datetime.datetime.now())
-        except Exception:
-            print Exception
-=======
                 logging.warning('url is error')
                 #print 'url is error'
         except Exception as e:
             logging.error(e.message)
->>>>>>> master:zoomeye/zoomeye.py
 
     def save_token(self):
         token = self.API_TOKEN
@@ -382,12 +290,6 @@ class ZoomEye():
             #write_s = '{}\n{}'.format(token, now_time)
             file.write(write_s)
             file.close()
-<<<<<<< HEAD:Zpoc/zoomeye.py
-            print '[INFO] {} : save token success'.format(datetime.datetime.now())
-        except IOError:
-            print '[ERROR] {} >>> save token fail'.format(datetime.datetime.now())
-            print IOError
-=======
             logging.debug('save token success')
             #print 'save token success'
         except IOError as e:
@@ -395,7 +297,6 @@ class ZoomEye():
             logging.error(e.message)
             #print 'save token fail'
             #print IOError
->>>>>>> master:zoomeye/zoomeye.py
     
     @staticmethod
     def load_token():
@@ -411,10 +312,7 @@ class ZoomEye():
                 try:
                     last_time = datetime.datetime.strptime(last_time_t, '%Y-%m-%d %H:%M:%S.%f')
                 except Exception:
-<<<<<<< HEAD:Zpoc/zoomeye.py
-=======
                     logging.debug('The datetime want %Y-%m-%d %H:%M:%S')
->>>>>>> master:zoomeye/zoomeye.py
                     last_time = datetime.datetime.strptime(last_time_t, '%Y-%m-%d %H:%M:%S')
                 #now_time = datetime.datetime.now()
                 #d = (now_time- last_time).days
