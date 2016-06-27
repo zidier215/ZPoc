@@ -38,8 +38,8 @@ class _log_module():
                name_day = str(datetime.datetime.now())[:10]
                self.zpoc_log = os.path.join(local_cwd, os.path.join('log', 'zpoc_log_{}.log'.format(name_day)))
                if not os.path.exists(self.zpoc_log) :
-                   f = open(self.zpoc_log, 'w')
-                   f.close()
+                   with open(self.zpoc_log, 'w') as f:
+                       pass
            try:
                # Config the logging Engine 
                logging.basicConfig(filename=self.zpoc_log, level=self.LEVEL[log_level], format='[%(levelname)s](%(asctime)s) in %(filename)s:line %(lineno)d : %(message)s')
@@ -222,6 +222,7 @@ class ZoomEye():
                 break
         logging.debug('write result 2 file {}'.format(file_name))        
         self.fname = file_name
+        files = ''
         try:
             files = open(file_name, 'w')
             files.write(strs)
@@ -271,18 +272,19 @@ class ZoomEye():
     def save_token(self):
         token = self.API_TOKEN
         now_time = datetime.datetime.now()
+        files = ''
         try:
             path = self.cwd#os.getcwd()
             file_name = os.path.join(path, 'token.txt')
             write_s = write_s = '{}\n{}'.format(now_time, token) # time before token
-            file = open(file_name, 'w')
-            file.write(write_s)
+            files = open(file_name, 'w')
+            files.write(write_s)
             logging.debug('save token success')
         except IOError as e:
             logging.error('save token fail')
             logging.error(e.message)
         finally:
-            file.close()
+            files.close()
     
     #@staticmethod
     def load_token(self):
@@ -291,11 +293,12 @@ class ZoomEye():
         try:
             path = self.cwd#os.getcwd()
             file_name = os.path.join(path, 'token.txt')
+            files = ''
             if os.path.exists(file_name):
                 try:
-                    file = open(file_name, 'r')
-                    last_time_t = '{}'.format(file.readline()).strip() # Clear the space or \n
-                    token = file.readline()
+                    files = open(file_name, 'r')
+                    last_time_t = '{}'.format(files.readline()).strip() # Clear the space or \n
+                    token = files.readline()
                     try:
                         last_time = datetime.datetime.strptime(last_time_t, '%Y-%m-%d %H:%M:%S.%f')
                     except Exception:
@@ -307,7 +310,7 @@ class ZoomEye():
                 except Exception as e:
                     logging.warning(e.message)
                 finally:
-                    file.close()
+                    files.close()
             else:
                 logging.warning('token file not exits') # 2 For WARNING level 
         except Exception as e:
