@@ -1,0 +1,7 @@
+.vscode/
+*.txt
+*.log
+log/*.log
+result/*
+test.*
+*.pyc

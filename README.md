@@ -23,7 +23,7 @@ Zpoc具备基于pocsuit的poc快速化开发框架，后面会有更多的框架
 
     ZoomEye 的sdk 接口，包括登录，搜索，搜索结果的存储。（已经实现）
      
-    结合pocsuit框架，实现快速进行poc测试（正在开发中ing）
+    结合pocsuit框架，实现快速进行poc测试（已经实现）
     
     poc库实现，漏洞的相关测试，以及poc和dork的智能提示（开发ing）
 
