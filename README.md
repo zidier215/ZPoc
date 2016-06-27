@@ -35,7 +35,7 @@ Zpoc具备基于pocsuit的poc快速化开发框架，后面会有更多的框架
 
     首先，将zpoc放于pocsuite安装包下
 
-    使用时，切换到项目下，使用命令如下所示：
+    使用时，切换到Zpoc项目下，使用命令如下所示：
 
 	python lock.py -d dork -o port -p page -r poc
 
