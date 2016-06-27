@@ -223,12 +223,12 @@ class ZoomEye():
         logging.debug('write result 2 file {}'.format(file_name))        
         self.fname = file_name
         try:
-            file = open(file_name, 'w')
-            file.write(strs)
+            files = open(file_name, 'w')
+            files.write(strs)
         except IOError as e:
             logging.error(e.message)
         finally :
-            file.close()
+            files.close()
 
 
     def _parse_json(self, jsondata):
