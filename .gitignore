@@ -1,6 +1,7 @@
-.vscode/*
+.vscode/
 *.txt
 *.log
-log/*
+log/*.log
+result/*
 test.*
 *.pyc

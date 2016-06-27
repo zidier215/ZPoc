@@ -1,8 +1,6 @@
-#!/usr/bin/python
-#coding=utf8
-__author__ = 'MR.SJ'
 # !/usr/bin/python2.7
 # -*- coding: UTF-8 -*-
+__author__ = 'MR.SJ'
 import json
 import certifi
 import pycurl
@@ -31,13 +29,14 @@ class _log_module():
            self.zpoc_log = file_dst
            self.log_level = log_level
            self.write_fd = None 
+           local_cwd = os.getcwd()
            # If the log file is not specify by User, Use Default path : ./log/zpoc_log_xxx,log
            if self.zpoc_log is None:
-               tmp = os.path.join(os.getcwd(), 'log')
+               tmp = os.path.join(local_cwd, 'log')
                if not os.path.exists(tmp) :
                    os.mkdir(tmp)
                name_day = str(datetime.datetime.now())[:10]
-               self.zpoc_log = os.path.join(os.getcwd(), os.path.join('log', 'zpoc_log_{}.log'.format(name_day)))
+               self.zpoc_log = os.path.join(local_cwd, os.path.join('log', 'zpoc_log_{}.log'.format(name_day)))
                if not os.path.exists(self.zpoc_log) :
                    f = open(self.zpoc_log, 'w')
                    f.close()
@@ -63,19 +62,21 @@ class ZoomEye():
         self.API_TOKEN = None
         self.url = 'https://api.zoomeye.org/user/login'
         self.user_name = username
-        self.password = password
+        self.password  = password
         self.data = {
             "username": self.user_name,
             "password": self.password
         }
         self.fname = ''
         self.post_data = json.dumps(self.data)
-        self.port = ''
+        self.port   = ''
         self.facets = ''
         self.ip_list = []
         self.ip_queue = Queue.Queue(-1)
         # logging The Message, Depend by the Singleton of the ZoomEye() !!!
         self.logs = _log_module(log_levels)
+        # Current Work Directory
+        self.cwd  = os.getcwd()
 
     def login(self):
         token=self.load_token()
@@ -100,24 +101,18 @@ class ZoomEye():
             c.perform()
             if b.getvalue():
                 logging.info('success login') # For INFO level
-                #print 'success login'
                 self.API_TOKEN = json.loads(b.getvalue())["access_token"]
                 self.save_token()
             else:
                 logging.warning('success fail,get null result') #2 For WARNING level
-                #print 'success fail,get null result'
             logging.debug(self.API_TOKEN)
-            #print self.API_TOKEN
             b.close()
             c.close()
         except pycurl.E_HTTP_POST_ERROR:
             logging.error(str(pycurl.E_HTTP_POST_ERROR))
-            #print pycurl.E_HTTP_POST_ERROR
         except Exception as e:
             logging.error('please check your password or username')
             logging.error(e.message) #3 For ERROR level
-            #print 'please check your password or username'
-            #print e.message
             pass
 
 
@@ -136,18 +131,16 @@ class ZoomEye():
             self._write_file()
         else:
             logging.warning('page not be <0') # 2 For WARNING level
-            #print 'page not be <0'
             pass
         #thread.exit_thread()
         if self.fname and poc_name:
             try:
+                logging.debug(os.getcwd())
                 os.system('python pocsuite.py -r {} -f {}'.format(poc_name, self.fname))
             except Exception as e:
                 logging.error(e.message) # 3 For ERROR level            
         else:
             logging.error('args error') # 3 For ERROR level
-            #print 'args error'
-
 
     def run_fast(self, port, page, facets):
         for i in range(page):
@@ -160,7 +153,6 @@ class ZoomEye():
         logging.debug('port:{}, facets:{}'.format(port, facets))
         if not port and not facets:
             logging.warning('port or facets cant null')
-            #print 'port or facets cant null'
             sys.exit()
         if port != 0:
             url = '{}{}'.format(url, '"port:%s"' % port)
@@ -179,14 +171,12 @@ class ZoomEye():
             else:
                 url = '{}{}'.format(url, 'facets=%s' % facets)
         logging.debug(url)        
-        #print url
         return url
 
 
     def _get_url(self, url):
         if self.API_TOKEN == None:
             logging.error('none token') # 3 For ERROR level
-            #print 'none token'
             return
         try:
             c = pycurl.Curl()
@@ -201,45 +191,44 @@ class ZoomEye():
             c.perform()
             result = b.getvalue()
             logging.debug('result')
-            #print 'result'
         except Exception as e:
             logging.error(e.message)
             logging.error('go error')
-            #print e
-            #print 'go error'
             pass
         return result
 
 
     def _write_file(self):
         strs = ''
+        # Put All txt into the 'result' Directory
+        path = os.path.join(self.cwd, 'result') 
+        try:      
+            if not os.path.exists(path):
+                os.mkdir(path)
+        except Exception as e:
+            logging.debug(e.message)
         for i in self.ip_list:
             ip = '{}\n'.format(i)
             strs = strs + ip
         r = str(datetime.datetime.now()).replace(' ', '-') 
-        #r = random.randrange(1, 100000)
-        path = os.getcwd()
+        #path = #os.getcwd()
         file_name = os.path.join(path, str(self.facets)+'_'+str(r)+'.txt')
-        #file_name = '{}\\{}_{}.txt'.format(path, self.facets, r)
         logging.debug(file_name)
-        #print file_name
         while True:
             if os.path.exists("{}".format(file_name)):
                 r = random.randrange(1, 100000)
                 file_name = os.path.join(path, str(self.facets)+'_'+str(r)+'.txt')
-                #file_name = '{}\\{}_{}.txt'.format(path, self.facets, r)
             else:
                 break
         logging.debug('write result 2 file {}'.format(file_name))        
-        #print 'write result 2 file {}'.format(file_name)
         self.fname = file_name
         try:
             file = open(file_name, 'w')
             file.write(strs)
-            file.close()
         except IOError as e:
             logging.error(e.message)
-            #print IOError
+        finally :
+            file.close()
 
 
     def _parse_json(self, jsondata):
@@ -261,7 +250,6 @@ class ZoomEye():
                             self.ip_list.append(result['ip'])
                         else:
                             logging.warning('just go wrong') # 2 For WARNING level
-                            #print 'just go wrong'
                     if facets:
                         for facet in data['facets']:
                             if host.has_key(facet):
@@ -277,7 +265,6 @@ class ZoomEye():
 
             else:
                 logging.warning('url is error')
-                #print 'url is error'
         except Exception as e:
             logging.error(e.message)
 
@@ -285,52 +272,44 @@ class ZoomEye():
         token = self.API_TOKEN
         now_time = datetime.datetime.now()
         try:
-            path = os.getcwd()
-            #file_name = '{}\\token.txt'.format(path)
+            path = self.cwd#os.getcwd()
             file_name = os.path.join(path, 'token.txt')
             write_s = write_s = '{}\n{}'.format(now_time, token) # time before token
             file = open(file_name, 'w')
-            #write_s = '{}\n{}'.format(token, now_time)
             file.write(write_s)
-            file.close()
             logging.debug('save token success')
-            #print 'save token success'
         except IOError as e:
             logging.error('save token fail')
             logging.error(e.message)
-            #print 'save token fail'
-            #print IOError
+        finally:
+            file.close()
     
-    @staticmethod
-    def load_token():
+    #@staticmethod
+    def load_token(self):
         now_time = datetime.datetime.now()
         token = ''
         try:
-            path = os.getcwd()
+            path = self.cwd#os.getcwd()
             file_name = os.path.join(path, 'token.txt')
             if os.path.exists(file_name):
-                file = open(file_name, 'r')
-                last_time_t = '{}'.format(file.readline()).strip() # Clear the space or \n
-                token = file.readline()
                 try:
-                    last_time = datetime.datetime.strptime(last_time_t, '%Y-%m-%d %H:%M:%S.%f')
-                except Exception:
-                    logging.debug('The datetime want %Y-%m-%d %H:%M:%S')
-                    last_time = datetime.datetime.strptime(last_time_t, '%Y-%m-%d %H:%M:%S')
-                #now_time = datetime.datetime.now()
-                #d = (now_time- last_time).days
-                #if d.days <1 and token:
-                if token :
-                    if ((now_time - last_time) < _limit_time) : #_limit_time is in the top of this file
-                        return token
+                    file = open(file_name, 'r')
+                    last_time_t = '{}'.format(file.readline()).strip() # Clear the space or \n
+                    token = file.readline()
+                    try:
+                        last_time = datetime.datetime.strptime(last_time_t, '%Y-%m-%d %H:%M:%S.%f')
+                    except Exception:
+                        logging.debug('The datetime want %Y-%m-%d %H:%M:%S')
+                        last_time = datetime.datetime.strptime(last_time_t, '%Y-%m-%d %H:%M:%S')
+                    if token :
+                        if ((now_time - last_time) < _limit_time) : #_limit_time is in the top of this file
+                            return token
+                except Exception as e:
+                    logging.warning(e.message)
+                finally:
+                    file.close()
             else:
                 logging.warning('token file not exits') # 2 For WARNING level 
-                #print 'token file not exits'
-        except IOError as e:
-            logging.error(e.message)
-            #print IOError
         except Exception as e:
             logging.error(e.message)
-            #print Exception
-
         return None
