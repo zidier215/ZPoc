@@ -30,7 +30,6 @@ class _log_module():
            self.log_level = log_level
            self.write_fd = None 
            local_cwd = os.getcwd()
-           # If the log file is not specify by User, Use Default path : ./log/zpoc_log_xxx,log
            if self.zpoc_log is None:
                tmp = os.path.join(local_cwd, 'log')
                if not os.path.exists(tmp) :
@@ -41,7 +40,6 @@ class _log_module():
                    with open(self.zpoc_log, 'w') as f:
                        pass
            try:
-               # Config the logging Engine 
                logging.basicConfig(filename=self.zpoc_log, level=self.LEVEL[log_level], format='[%(levelname)s](%(asctime)s) in %(filename)s:line %(lineno)d : %(message)s')
            except Exception:
                self.writefd = sys.stderr
@@ -121,7 +119,6 @@ class ZoomEye():
         self.facets = facets
         if page > 0:
             for i in range(1, int(page) + 1):
-                #url = 'https://api.zoomeye.org/host/search?query="port:{}"&page={}&facets={}'.format(port, i, facets)
                 url = self._get_search_url(port, page, facets)
                 url = '{}{}'.format(url,'&page=%s'%i)
                 logging.debug('_get_url')
@@ -132,15 +129,18 @@ class ZoomEye():
         else:
             logging.warning('page not be <0') # 2 For WARNING level
             pass
-        #thread.exit_thread()
+        self.comand_poc(poc_name)
+
+    def comand_poc(self,poc_name):
         if self.fname and poc_name:
             try:
                 logging.debug(os.getcwd())
-                os.system('python pocsuite.py -r {} -f {}'.format(poc_name, self.fname))
+                os.system('pocsuite -r {} -f {}'.format(poc_name, self.fname))
             except Exception as e:
-                logging.error(e.message) # 3 For ERROR level            
+                logging.error(e.message) # 3 For ERROR level
         else:
             logging.error('args error') # 3 For ERROR level
+            sys.exit(1)
 
     def run_fast(self, port, page, facets):
         for i in range(page):
@@ -157,14 +157,6 @@ class ZoomEye():
         if port != 0:
             url = '{}{}'.format(url, '"port:%s"' % port)
             flag = True
-        # if page > 0:
-        #     if flag:
-        #         url = '{}{}'.format(url, '&page={}')
-        #     else:
-        #         url = '{}{}'.format(url, 'page={}')
-        #     flag = True
-        # else:
-        #     flag = False
         if facets:
             if flag:
                 url = '{}{}'.format(url, '&facets=%s' % facets)
@@ -210,26 +202,25 @@ class ZoomEye():
         for i in self.ip_list:
             ip = '{}\n'.format(i)
             strs = strs + ip
-        r = str(datetime.datetime.now()).replace(' ', '-') 
-        #path = #os.getcwd()
-        file_name = os.path.join(path, str(self.facets)+'_'+str(r)+'.txt')
+        # r = str(datetime.datetime.now()).replace(' ', '-')
+        # r=str(r.replace(':','-'))
+        r = datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S")
+        #file_name = os.path.join(path, str(self.facets)+'_'+str(r)+'.txt')
+        file_name = os.path.join(path,self.port+self.facets+str(r)+'.txt')
         logging.debug(file_name)
-        while True:
-            if os.path.exists("{}".format(file_name)):
-                r = random.randrange(1, 100000)
-                file_name = os.path.join(path, str(self.facets)+'_'+str(r)+'.txt')
-            else:
-                break
-        logging.debug('write result 2 file {}'.format(file_name))        
+        logging.debug('write result to file {}'.format(file_name))
+        file_name=r'{}'.format(file_name)
         self.fname = file_name
-        files = ''
+        files = open(file_name, 'w')
         try:
-            files = open(file_name, 'w')
+            logging.debug('write file')
+            print 'write file'
             files.write(strs)
+            files.close()
+            logging.debug('write success')
         except IOError as e:
             logging.error(e.message)
-        finally :
-            files.close()
+
 
 
     def _parse_json(self, jsondata):

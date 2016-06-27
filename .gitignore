@@ -5,3 +5,4 @@ log/*.log
 result/*
 test.*
 *.pyc
+.ideal
