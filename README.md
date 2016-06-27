@@ -30,8 +30,22 @@ Zpoc具备基于pocsuit的poc快速化开发框架，后面会有更多的框架
 	基于整个Zpoc测试的深入学习，实现一键化和学习化（开发ing）
 
 
-  
+####使用方式：
+    项目现在暂时依赖于pocsuite库
 
+    首先，将zpoc放于pocsuite安装包下
+
+    使用时，切换到项目下，使用命令如下所示：
+
+	python lock.py -d dork -o port -p page -r poc
+
+	说明：
+	-d  组件名称
+	-o  端口号
+	-p  页数
+	-r  poc
+	
+    
 ### 相关平台框架： 
 > [Seebug ](https://www.seebug.org/)
 >  
