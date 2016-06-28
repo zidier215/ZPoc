@@ -97,22 +97,26 @@ class ZoomEye():
             c.setopt(pycurl.CUSTOMREQUEST, "POST")
             c.setopt(pycurl.POSTFIELDS, self.post_data)
             c.perform()
-            if b.getvalue():
-                logging.info('success login') # For INFO level
-                self.API_TOKEN = json.loads(b.getvalue())["access_token"]
+            message = b.getvalue()
+            if message:
+                logging.debug('Get Message From ZoomEye.org Success!')
+                self.API_TOKEN = json.loads(message)["access_token"]
+                # if self.API_TOKEN is nothing ,WILL Raise Exception by json.loads()
                 self.save_token()
             else:
-                logging.warning('success fail,get null result') #2 For WARNING level
+                logging.error('login fail,get nothing From ZoomEye.org') #2 For WARNING level
+                raise Exception('Get Nothing')
             logging.debug(self.API_TOKEN)
             b.close()
             c.close()
         except pycurl.E_HTTP_POST_ERROR:
             logging.error(str(pycurl.E_HTTP_POST_ERROR))
+            # exit , will Be Replaced by Re-Entry
+            sys.exit()
         except Exception as e:
-            logging.error('please check your password or username')
-            logging.error(e.message) #3 For ERROR level
-            pass
-
+            logging.error(e.message + ' AND CHECK Your ZoomEye/Seebug Username and Password') #3 For ERROR level
+            # exit , will Be Replaced by Re-Entry
+            sys.exit()
 
     def _search(self, port, page, facets, poc_name):
         self.port = port
@@ -135,9 +139,15 @@ class ZoomEye():
         if self.fname and poc_name:
             try:
                 logging.debug(os.getcwd())
-                os.system('pocsuite -r {} -f {}'.format(poc_name, self.fname))
+                exit_code = os.system('pocsuite -r {} -f {}'.format(poc_name, self.fname))
+                if exit_code is not 0:
+                    exit_code = os.system('python ../pocsuites.py -r {} -f {}'.format(poc_name, self.fname))
+                elif exit_code is not 0:
+                    exit_code = os.system('python pocsuites.py -r {} -f {}'.format(poc_name, self.fname))
+                else:
+                    raise Exception('No Such Command, Check Your pocsuite')
             except Exception as e:
-                logging.error(e.message) # 3 For ERROR level
+                logging.error('os.system : '+e.message) # 3 For ERROR level
         else:
             logging.error('args error') # 3 For ERROR level
             sys.exit(1)
@@ -182,11 +192,12 @@ class ZoomEye():
             c.setopt(pycurl.FOLLOWLOCATION, 1)
             c.perform()
             result = b.getvalue()
+            if not result:
+                raise Exception('getvalue() error')
             logging.debug('result')
         except Exception as e:
             logging.error(e.message)
-            logging.error('go error')
-            pass
+            logging.error('_get_url has meet Some Error, Check your Network')
         return result
 
 
@@ -202,8 +213,6 @@ class ZoomEye():
         for i in self.ip_list:
             ip = '{}\n'.format(i)
             strs = strs + ip
-        # r = str(datetime.datetime.now()).replace(' ', '-')
-        # r=str(r.replace(':','-'))
         r = datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S")
         #file_name = os.path.join(path, str(self.facets)+'_'+str(r)+'.txt')
         file_name = os.path.join(path,self.port+self.facets+str(r)+'.txt')

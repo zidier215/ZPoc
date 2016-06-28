@@ -6,3 +6,4 @@ result/*
 test.*
 *.pyc
 .ideal
+xxe.py
