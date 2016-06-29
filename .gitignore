@@ -2,8 +2,8 @@
 *.txt
 *.log
 log/*.log
-pocs/xxe.py
 result/*
 *.pyc
 .ideal
 xxe.py
+poc/*.py
