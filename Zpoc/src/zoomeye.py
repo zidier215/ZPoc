@@ -14,7 +14,10 @@ import sys
 import logging
 
 _limit_time = datetime.timedelta(0,0,0,0,0,12,0)
-
+HOST_SERACH = 0
+WEB_SEARCH  = 1
+_host_api = 'https://api.zoomeye.org/host/search?'
+_web_api  = 'https://api.zoomeye.org/web/search?'
 # 这是一个初始化的类，以来于ZoomEye() 类的单例效果，不会重复初始化
 # 使用的时候还是依靠 logging的五个接口
 # logging.debug(message), logging.info(message), logging.warning(message)
@@ -29,13 +32,13 @@ class _log_module():
            self.zpoc_log = file_dst
            self.log_level = log_level
            self.write_fd = None 
-           local_cwd = os.getcwd()
+           local_cwd = os.path.dirname(os.getcwd())
            if self.zpoc_log is None:
-               tmp = os.path.join(local_cwd, 'log')
+               tmp = os.path.join(local_cwd, 'logs')
                if not os.path.exists(tmp) :
                    os.mkdir(tmp)
                name_day = str(datetime.datetime.now())[:10]
-               self.zpoc_log = os.path.join(local_cwd, os.path.join('log', 'zpoc_log_{}.log'.format(name_day)))
+               self.zpoc_log = os.path.join(local_cwd, os.path.join('logs', 'zpoc_log_{}.log'.format(name_day)))
                if not os.path.exists(self.zpoc_log) :
                    with open(self.zpoc_log, 'w') as f:
                        pass
@@ -117,13 +120,13 @@ class ZoomEye():
             logging.error(e.message + ' AND CHECK Your ZoomEye/Seebug Username and Password') #3 For ERROR level
             # exit , will Be Replaced by Re-Entry
             sys.exit()
-
-    def _search(self, port, page, facets, poc_name):
-        self.port = port
+    
+    # Search Code
+    def _search(self, query, page, facets, poc_name, type=HOST_SERACH):
         self.facets = facets
         if page > 0:
             for i in range(1, int(page) + 1):
-                url = self._get_search_url(port, page, facets)
+                url = self._get_search_url(query, page, facets, type)
                 url = '{}{}'.format(url,'&page=%s'%i)
                 logging.debug('_get_url')
                 print '_get_url'
@@ -134,7 +137,38 @@ class ZoomEye():
             logging.warning('page not be <0') # 2 For WARNING level
             pass
         self.comand_poc(poc_name)
-
+    
+    # Host Search
+    def _host_search(self, query, page, facets, poc_name):
+        self._search(query, page, facets, poc_name, HOST_SERACH)
+    # Web Search
+    def _web_search(self, query, page, facets, poc_name):
+        self._search(query, page, facets, poc_name, WEB_SEARCH)
+    # Interface of Search        
+    def search(self, port, page, facets, poc_name, query, search_type):
+        # If Port(-o, --port) is not specific, then take it From query 
+        if port == -1:
+            for i,val in enumerate(query):
+                tmp = val.find('port:')
+                if tmp != -1:
+                    port = val[5:]
+                    break
+        if port == -1:
+            port = ''    
+        self.port = port
+        query_arg = ''
+        for i, val in enumerate(query):
+            query_arg += val+' '
+        # if Query Argument is Not Empty    
+        if query_arg != '':
+            query_arg = '"{}"'.format(query_arg.rstrip(' '))
+        if search_type == HOST_SERACH:
+            logging.debug('Host Search For query:{}, facets:{}, page:{}, poc-file:{}'.format(query_arg,facets,page,poc_name))
+            self._host_search(query_arg, page, facets, poc_name)
+        else:
+            logging.debug('Web Search For query:{}, facets:{}, page:{}, poc-file:{}'.format(query_arg,facets,page,poc_name))
+            self._web_search(query_arg, page, facets, poc_name)
+    
     def comand_poc(self,poc_name):
         if self.fname and poc_name:
             try:
@@ -157,17 +191,22 @@ class ZoomEye():
             thread.start_new_thread(self._search(port, page, facets), (i, i))
 
 
-    def _get_search_url(self, port, page, facets):
-        url = 'https://api.zoomeye.org/host/search?query='
+    def _get_search_url(self, query, page, facets, type):
+        url = _host_api
+        if type is not WEB_SEARCH and type is not HOST_SERACH:
+            logging.error('search type is ERROR! Check For real')
+        if type is WEB_SEARCH:
+            url = _web_api    
         flag = False
-        logging.debug('port:{}, facets:{}'.format(port, facets))
-        if not port and not facets:
+        logging.debug('query:{}, facets:{}'.format(query, facets))
+        if query == '' and facets == '':
             logging.warning('port or facets cant null')
             sys.exit()
-        if port != 0:
-            url = '{}{}'.format(url, '"port:%s"' % port)
+        if query != '':
+            url = '{}{}'.format(url, 'query={}'.format(query))
             flag = True
-        if facets:
+            #url = '{}{}'.format(url, '"port:%s"' % port)
+        if facets != '':
             if flag:
                 url = '{}{}'.format(url, '&facets=%s' % facets)
             else:
@@ -180,6 +219,8 @@ class ZoomEye():
         if self.API_TOKEN == None:
             logging.error('none token') # 3 For ERROR level
             return
+        logging.debug('FULL REQUEST '+url)
+        result = ''
         try:
             c = pycurl.Curl()
             c.setopt(pycurl.CAINFO, certifi.where())
@@ -192,6 +233,7 @@ class ZoomEye():
             c.setopt(pycurl.FOLLOWLOCATION, 1)
             c.perform()
             result = b.getvalue()
+            logging.debug(result)
             if not result:
                 raise Exception('getvalue() error')
             logging.debug('result')
@@ -203,8 +245,8 @@ class ZoomEye():
 
     def _write_file(self):
         strs = ''
-        # Put All txt into the 'result' Directory
-        path = os.path.join(self.cwd, 'result') 
+        # Put All txt into the 'zoomeyedata' Directory
+        path = os.path.join(os.path.dirname(self.cwd), 'zoomeyedata') 
         try:      
             if not os.path.exists(path):
                 os.mkdir(path)
@@ -215,7 +257,7 @@ class ZoomEye():
             strs = strs + ip
         r = datetime.datetime.now().strftime("%Y-%m-%d-%H%M%S")
         #file_name = os.path.join(path, str(self.facets)+'_'+str(r)+'.txt')
-        file_name = os.path.join(path,self.port+self.facets+str(r)+'.txt')
+        file_name = os.path.join(path,self.facets.replace('/',',')+str(r)+'.txt')
         logging.debug(file_name)
         logging.debug('write result to file {}'.format(file_name))
         file_name=r'{}'.format(file_name)
