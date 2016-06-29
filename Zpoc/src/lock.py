@@ -16,7 +16,7 @@ import zoomeye
 import os
 
 if __name__ == "__main__":
-    z = zoomeye.ZoomEye("1064901069@qq.com", "@wsx88619973@", 0)
+    z = zoomeye.ZoomEye("", "", 0)
     z.login()
     dork = ''
     port = -1

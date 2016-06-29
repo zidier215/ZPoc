@@ -29,23 +29,25 @@ Zpoc具备基于pocsuit的poc快速化开发框架，后面会有更多的框架
 
 	基于整个Zpoc测试的深入学习，实现一键化和学习化（开发ing）
 
+### 安装说明
+- [安装说明](doc/install.md)	在 **doc/install.md**
 
-####使用方式：
+####使用参数：
     项目现在暂时依赖于pocsuite库
 
-    首先，将zpoc放于pocsuite安装包下
+    使用时，切换到src项目下，使用命令如下所示：
 
-    使用时，切换到Zpoc项目下，使用命令如下所示：
-
-	python lock.py -d dork -o port -p page -r poc
-
-	说明：
-	-d  组件名称
-	-o  端口号
-	-p  页数
-	-r  poc
+	python lock.py -q/--query=  #query数据，每个数据用逗号隔开
+				   -d/--facets= #facet数据，每个数据用逗号隔开
+				   -s/--search= #搜索类型：Web搜索或者host搜索，默认host搜索
+				   -p/--page=   #页数默认是1
+				   -r/--poc=    #PoC文件
+				   -o/--port=   #由前一版本留下，如果`-q`中有port数据，则会被-o选项替换
+				   -f/--script-file= #脚本文件，用来省略命令行参数填充（待开发）
 	
-    
+- 详细说明以及使用范例：
+	- `python lock.py --help`
+
 ### 相关平台框架： 
 > [Seebug ](https://www.seebug.org/)
 >  
