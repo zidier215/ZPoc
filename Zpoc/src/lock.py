@@ -13,6 +13,8 @@ import os
 
 if __name__ == "__main__":
 
+    #if len(sys.argv) == 1:
+    #    zpoc_client()
     dork = ''
     port = -1
     page = 1

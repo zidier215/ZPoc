@@ -68,6 +68,7 @@ class ZoomEye():
             "username": self.user_name,
             "password": self.password
         }
+        self.search_type = HOST_SERACH
         self.fname = ''
         self.post_data = json.dumps(self.data)
         self.port   = ''
@@ -129,9 +130,12 @@ class ZoomEye():
                 url = self._get_search_url(query, page, facets, type)
                 url = '{}{}'.format(url,'&page=%s'%i)
                 logging.debug('_get_url')
-                print '_get_url'
+                #print '_get_url'
                 data = self._get_url(url)
-                self._parse_json(data)
+                if self.search_type is HOST_SERACH:
+                    self._parse_json(data)
+                else:
+                    self._parse_json_get_ip(data)
             self._write_file()
         else:
             logging.warning('page not be <0') # 2 For WARNING level
@@ -273,7 +277,16 @@ class ZoomEye():
             logging.error(e.message)
 
 
-
+    def _parse_json_get_ip(self, rawdata):
+        # Search For ip message Means that "ip": [xxx.xxx.xxx.xxx]
+        found = rawdata.find('"ip":')
+        while found != -1:
+            start = rawdata.find('[', found) + 2
+            end = rawdata.find('"]', start)
+            logging.debug('ip: {}'.format(rawdata[start:end]))
+            self.ip_list.append(rawdata[start:end])
+            found = rawdata.find('"ip":', end)
+    
     def _parse_json(self, jsondata):
         port = self.port
         facets = self.facets
