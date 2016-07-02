@@ -30,7 +30,7 @@ Zpoc具备基于pocsuit的poc快速化开发框架，后面会有更多的框架
 	基于整个Zpoc测试的深入学习，实现一键化和学习化（开发ing）
 
 ### 安装说明
-- [安装说明](doc/install.md)	在 **doc/install.md**
+- [安装说明](Zpoc/doc/install.md)	在 **doc/install.md**
 
 ####使用参数：
     项目现在暂时依赖于pocsuite库

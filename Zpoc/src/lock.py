@@ -4,11 +4,7 @@ __author__ = 'MR.SJ'
 
 #####################################################
 # example:
-#python lock.py -d app,os -p 1 -o 21 -r xxe.py
-#-d dork
-#-p page
-#-o port
-#-r poc
+#python lock.py --help
 ####################################################
 import getopt
 import sys
@@ -16,7 +12,12 @@ import zoomeye
 import os
 
 if __name__ == "__main__":
-    z = zoomeye.ZoomEye("", "", 0)
+    name = raw_input('Enter Your ZoomEye Password: ')
+    psw  = raw_input('Enter Your ZoomEye Password: ')
+    #sys.exit(1)
+    z = zoomeye.ZoomEye(name, psw, 0)
+    name = ''
+    psw = ''
     z.login()
     dork = ''
     port = -1
@@ -24,7 +25,7 @@ if __name__ == "__main__":
     poc_name = ''
     search_type = zoomeye.HOST_SERACH
     query = []
-    opts, args = getopt.getopt(sys.argv[1:], "hd:o:p:r:q:s:f", ["help", 'dork=', 'port=', 'page=', 'poc=', 'query=', 'search-type=', 'script-file='])
+    opts, args = getopt.getopt(sys.argv[1:], "hd:o:p:r:q:s:f", ["help", 'facets=', 'port=', 'page=', 'poc=', 'query=', 'search-type=', 'script-file='])
     for op, value in opts:
         if op in ('-q', '--query'):
             query = value.split(',')
@@ -36,7 +37,7 @@ if __name__ == "__main__":
             else:
                 print 'Bad Search Type Sepcific, Check it For Real!'
                 sys.exit(1)
-        elif op in ('-d', '--dork'):
+        elif op in ('-d', '--facets'):
             dork = value
         elif op in ('-p', '--page'):
             page = value
@@ -45,7 +46,8 @@ if __name__ == "__main__":
         elif op in ('-r', '--poc'):
             poc_name = value
         elif op in ('-f', '--script-file'):
-            pass
+            print '-f/--script-file is Developing ^-^'
+            sys.exit(1)
         elif op in ('-h', '--help'):
             print ''' 
 Usage: python lock.py [OPTION1] [ARGUMENT1] ... 
@@ -62,7 +64,7 @@ Usage: python lock.py [OPTION1] [ARGUMENT1] ...
 Examples: 
         1. python lock.py -q nginx,port:80 -d app,os -s host -p 1 -r xxe.py
         2. python lock.py --query=nginx,port:80 -d webapp,os -s web -p 1 -r xxe.py
-        3. python lock.py -f xxx.zpoc
+      * 3. python lock.py -f xxx.zpoc
             '''
             sys.exit(0)
     # Replace Port Message in Query
@@ -96,7 +98,6 @@ Examples:
     
     z.search(port, page, dork, poc_name, query, search_type)
     #print 'test'
-    #print page, dork, poc_name, query
-        
+    #print page, dork, poc_name, query       
     #z._search(port, page, dork, poc_name)
 
