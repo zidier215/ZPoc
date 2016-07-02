@@ -12,13 +12,7 @@ import zoomeye
 import os
 
 if __name__ == "__main__":
-    name = raw_input('Enter Your ZoomEye Password: ')
-    psw  = raw_input('Enter Your ZoomEye Password: ')
-    #sys.exit(1)
-    z = zoomeye.ZoomEye(name, psw, 0)
-    name = ''
-    psw = ''
-    z.login()
+
     dork = ''
     port = -1
     page = 1
@@ -95,7 +89,13 @@ Examples:
                 poc_name = tmp
     if dork == '':
         print 'facets is Empty'
-    
+    name = raw_input('Enter Your ZoomEye Password: ')
+    psw  = raw_input('Enter Your ZoomEye Password: ')
+    #sys.exit(1)
+    z = zoomeye.ZoomEye(name, psw, 0)
+    name = ''
+    psw = ''
+    z.login()
     z.search(port, page, dork, poc_name, query, search_type)
     #print 'test'
     #print page, dork, poc_name, query       
