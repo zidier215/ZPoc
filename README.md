@@ -43,7 +43,7 @@ Zpoc具备基于pocsuit的poc快速化开发框架，后面会有更多的框架
 				   -p/--page=   #页数默认是1
 				   -r/--poc=    #PoC文件
 				   -o/--port=   #由前一版本留下，如果`-q`中有port数据，则会被-o选项替换
-				   -f/--script-file= #脚本文件，用来省略命令行参数填充（待开发）
+				   -f/--script-file= #脚本文件，用来省略命令行参数填充
 	
 - 详细说明以及使用范例：
 	- `python lock.py --help`

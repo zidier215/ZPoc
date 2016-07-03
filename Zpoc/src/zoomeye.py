@@ -221,10 +221,16 @@ class ZoomEye():
                 #print '_get_url'
                 data = self._get_url(url)
                 try:
-                    if self.search_type is HOST_SEARCH:
+                    if type == HOST_SEARCH:
+                        logging.debug('HOST_SEARCH Start')
                         self._parse_json(data)
-                    else:
+                        logging.debug('HOST_SEARCH End')
+                    elif type == WEB_SEARCH:
+                        logging.debug('WEB_SEARCH Start')
                         self._parse_json_get_ip(data)
+                        logging.debug('WEB_SEARCH End')
+                    else:
+                        raise Exception('Bad Search Type')
                 except Exception as e:
                     logging.warning(e.message)
                     return

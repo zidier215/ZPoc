@@ -1,0 +1,9 @@
+# Line start with '#' will be ignored
+# There will be 6 (key : value) pair
+
+query : port:80
+port : 
+page : 1
+facets : app,os
+search-type : host
+poc :  none
