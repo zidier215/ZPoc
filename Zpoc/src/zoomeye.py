@@ -14,10 +14,74 @@ import sys
 import logging
 
 _limit_time = datetime.timedelta(0,0,0,0,0,12,0)
-HOST_SERACH = 0
+HOST_SEARCH = 0
 WEB_SEARCH  = 1
 _host_api = 'https://api.zoomeye.org/host/search?'
 _web_api  = 'https://api.zoomeye.org/web/search?'
+ENGLISH = 0
+CHINESE = 1
+def zoomeye_help(type = ENGLISH):
+    if type == ENGLISH:
+        print '''
+    IF YOU WANT CHINESE HELP: zoomeye.zoomeye_help(zoomeye.CHINESE)
+
+       zoomeye_username = 'zpoc@domain.com'
+       zoomeye_password = 'zpoc'
+       log_level = 1 
+    1. zpoc = zoomeye.ZoomEye(zoomeye_username, zoomeye_password, log_level)
+        PS: log_level is from 0 up to 4 For debug, info, warning, error, critical
+            you also could IGNORE it, Because of its Default Value is 1
+    2. zpoc.login()
+        PS: Call login to Fetch the token, And you Could GET/POST message Success
+            To put it Simplely, It makes our Program to Work now
+       page = 1
+       query = ['port:80']
+       facets = 'app,os'
+       poc_name = 'xxx.py'
+       port = ''
+       search_type = zoomeye.HOST_SEARCH
+    3. zpoc.search(port, page, facets, poc_name, query, search_type)
+        PS: From Up to Down is : page We need, query argument is a list, facets argument,
+        port is just a historical paramter, set it to empty
+        poc_name is For PoC file name, put it to le pocs directory
+        search_type is For Web Search OR Host Search : zoomeye.WEB_SEARCH, zoomeye.HOST_SEARCH
+    4. zpoc.search(....) # Second time Search AS the same syntax
+        new_username = 'newzpoc@domain.com'
+        new_password = 'newzpoc'
+    5. zpoc.relogin(new_username, new_password)
+        PS: If you wanna to Change the ZoomEye Account, call relogin with Not Empty Paramters
+            If you wanna to logout, Just Make the two paramters stay Empty ''
+        '''
+    else:
+        print '''
+   zoomeye_username = 'zpoc@domain.com'
+   zoomeye_password = 'zpoc'
+   log_level = 1
+1. zpoc = zoomeye.ZoomEye(zoomeye_username, zoomeye_password, log_level)
+    注释: log_level 的取值范围是0到4，分别对应 debug, info, warning, error, critical
+          你也可以忽略他们，因为这是一个带默认值的参数，默认是info级别
+2. zpoc.login()
+    注释: 调用login是为了取得token属性，这样就能正常获取数据了
+          简单来说，就是调用了login之后就能正常开始工作了
+   page = 1
+   query = ['port:80']
+   facets = 'app,os'
+   poc_name = 'xxx.py'
+   port = ''
+   search_type = zoomeye.HOST_SEARCH
+3. zpoc.search(port, page, facets, poc_name, query, search_type)
+    注释: 从上至下的参数依次是 : page 我们需要的页数, query 是一个链表, facets 参数,
+          port 是一个历史遗留的参数, 可以简单的将其置为空
+          poc_name 是你的PoC文件名, 把它放在pocs文件夹内
+          search_type 有两个取值 HOST_SEARCH 和 WEB_SEARCH
+4. zpoc.search(....) # 后续多次搜索只需要调用这个函数就行
+    new_username = 'newzpoc@domain.com'
+    new_password = 'newzpoc'
+5. zpoc.relogin(new_username, new_password)
+    注释: 如果你想更换账号，那就调用这个函数，并传入新的账号密码
+          如果你想退出本次账号，那将两个参数置为空 '' 就行
+    '''
+        
 # 这是一个初始化的类，以来于ZoomEye() 类的单例效果，不会重复初始化
 # 使用的时候还是依靠 logging的五个接口
 # logging.debug(message), logging.info(message), logging.warning(message)
@@ -68,7 +132,7 @@ class ZoomEye():
             "username": self.user_name,
             "password": self.password
         }
-        self.search_type = HOST_SERACH
+        self.search_type = HOST_SEARCH
         self.fname = ''
         self.post_data = json.dumps(self.data)
         self.port   = ''
@@ -87,6 +151,30 @@ class ZoomEye():
         else:
             self._login()
         return
+    
+    def _logout(self):
+        self.token = None
+        self.user_name = '' 
+        self.password  = ''
+        self.data = {"username": '', "password": ''}
+        token_file = os.path.join(os.getcwd(), 'token.txt')
+        try:
+            if os.path.exists(token_file):
+                os.remove(token_file)
+        except Exception as e:
+            logging.warning('loggout Exception For ' + e.message)
+    
+    def relogin(self, username, password):
+        self._logout()
+        if username == '' or password == '':
+            return
+        self.user_name = username
+        self.password = password
+        self.data = {
+            "username": self.user_name,
+            "password": self.password
+        }
+        self.login()
 
     def _login(self):
         try:
@@ -123,7 +211,7 @@ class ZoomEye():
             sys.exit()
     
     # Search Code
-    def _search(self, query, page, facets, poc_name, type=HOST_SERACH):
+    def _search(self, query, page, facets, poc_name, type=HOST_SEARCH):
         self.facets = facets
         if page > 0:
             for i in range(1, int(page) + 1):
@@ -132,10 +220,14 @@ class ZoomEye():
                 logging.debug('_get_url')
                 #print '_get_url'
                 data = self._get_url(url)
-                if self.search_type is HOST_SERACH:
-                    self._parse_json(data)
-                else:
-                    self._parse_json_get_ip(data)
+                try:
+                    if self.search_type is HOST_SEARCH:
+                        self._parse_json(data)
+                    else:
+                        self._parse_json_get_ip(data)
+                except Exception as e:
+                    logging.warning(e.message)
+                    return
             self._write_file()
         else:
             logging.warning('page not be <0') # 2 For WARNING level
@@ -144,7 +236,7 @@ class ZoomEye():
     
     # Host Search
     def _host_search(self, query, page, facets, poc_name):
-        self._search(query, page, facets, poc_name, HOST_SERACH)
+        self._search(query, page, facets, poc_name, HOST_SEARCH)
     # Web Search
     def _web_search(self, query, page, facets, poc_name):
         self._search(query, page, facets, poc_name, WEB_SEARCH)
@@ -166,7 +258,7 @@ class ZoomEye():
         # if Query Argument is Not Empty    
         if query_arg != '':
             query_arg = '"{}"'.format(query_arg.rstrip(' '))
-        if search_type == HOST_SERACH:
+        if search_type == HOST_SEARCH:
             logging.debug('Host Search For query:{}, facets:{}, page:{}, poc-file:{}'.format(query_arg,facets,page,poc_name))
             self._host_search(query_arg, page, facets, poc_name)
         else:
@@ -197,7 +289,7 @@ class ZoomEye():
 
     def _get_search_url(self, query, page, facets, type):
         url = _host_api
-        if type is not WEB_SEARCH and type is not HOST_SERACH:
+        if type is not WEB_SEARCH and type is not HOST_SEARCH:
             logging.error('search type is ERROR! Check For real')
         if type is WEB_SEARCH:
             url = _web_api    
@@ -290,7 +382,11 @@ class ZoomEye():
     def _parse_json(self, jsondata):
         port = self.port
         facets = self.facets
-        data = json.loads(jsondata)
+        data = None
+        try:
+            data = json.loads(jsondata)
+        except:
+            raise Exception('Data Receive Could Not Be parse by json')
         try:
             if 'matches' in data:
                 for host in data['matches']:

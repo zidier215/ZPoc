@@ -11,15 +11,37 @@ import sys
 import zoomeye
 import os
 
+def _help():
+    print ''' 
+Usage: python lock.py [OPTION1] [ARGUMENT1] ... 
+        [-d | --dork] [-p | --page] [-o | --port] [-r | --poc ] [-q | --query] [-s | --search-type]
+        [-f | --script-file] [-h | --help] \n
+        -q, --query         Query Message Argument
+        -d, --facets        Facet Argument, For facets used by ZoomEye Search Result in calculation
+        -o, --port          Port in query, Stay For historical
+        -r, --poc           Absolute Poc file path
+        -s, --search-type   Host Or Web Search
+        -p, --page          Page Argument
+        -f, --script-file   ZPoc Sript file, For tedious Command Line Argument Saving
+        -h, --help          Help Information \n
+Examples: 
+        1. python lock.py -q port:80,nginx -d app,os -s host -p 1 -r xxe.py
+        2. python lock.py --query=port:80,nginx -d webapp,os -s web -p 1 -r xxe.py
+      * 3. python lock.py -f xxx.zpoc
+Others:
+        1. If you want a Iterative Handle, Just open Python Iterative Environment, And Import zoomeye,
+        Call zoomeye.zoomeye_help() For More Usage
+        2. If you want a Command Line Operation, See Examples
+            '''
+    sys.exit(0)
+
 if __name__ == "__main__":
 
-    #if len(sys.argv) == 1:
-    #    zpoc_client()
     dork = ''
     port = -1
     page = 1
     poc_name = ''
-    search_type = zoomeye.HOST_SERACH
+    search_type = zoomeye.HOST_SEARCH
     query = []
     opts, args = getopt.getopt(sys.argv[1:], "hd:o:p:r:q:s:f", ["help", 'facets=', 'port=', 'page=', 'poc=', 'query=', 'search-type=', 'script-file='])
     for op, value in opts:
@@ -29,7 +51,7 @@ if __name__ == "__main__":
             if value == 'web':
                 search_type = zoomeye.WEB_SEARCH
             elif value == 'host':
-                search_type = zoomeye.HOST_SERACH
+                search_type = zoomeye.HOST_SEARCH
             else:
                 print 'Bad Search Type Sepcific, Check it For Real!'
                 sys.exit(1)
@@ -45,24 +67,7 @@ if __name__ == "__main__":
             print '-f/--script-file is Developing ^-^'
             sys.exit(1)
         elif op in ('-h', '--help'):
-            print ''' 
-Usage: python lock.py [OPTION1] [ARGUMENT1] ... 
-        [-d | --dork] [-p | --page] [-o | --port] [-r | --poc ] [-q | --query] [-s | --search-type]
-        [-f | --script-file] [-h | --help] \n
-        -q, --query         Query Message Argument
-        -d, --facets        Facet Argument, For facets used by ZoomEye Search Result in calculation
-        -o, --port          Port in query, Stay For historical
-        -r, --poc           Absolute Poc file path
-        -s, --search-type   Host Or Web Search
-        -p, --page          Page Argument
-        -f, --script-file   ZPoc Sript file, For tedious Command Line Argument Saving
-        -h, --help          Help Information \n
-Examples: 
-        1. python lock.py -q nginx,port:80 -d app,os -s host -p 1 -r xxe.py
-        2. python lock.py --query=nginx,port:80 -d webapp,os -s web -p 1 -r xxe.py
-      * 3. python lock.py -f xxx.zpoc
-            '''
-            sys.exit(0)
+            _help()
     # Replace Port Message in Query
     if port != -1:
         if query == []:
@@ -91,7 +96,7 @@ Examples:
                 poc_name = tmp
     if dork == '':
         print 'facets is Empty'
-    name = raw_input('Enter Your ZoomEye Password: ')
+    name = raw_input('Enter Your ZoomEye Username: ')
     psw  = raw_input('Enter Your ZoomEye Password: ')
     #sys.exit(1)
     z = zoomeye.ZoomEye(name, psw, 0)
