@@ -367,7 +367,7 @@ class ZoomEye():
         files = open(file_name, 'w')
         try:
             logging.debug('write file')
-            print 'write file'
+            ##print 'write file'
             files.write(strs)
             files.close()
             logging.debug('write success')

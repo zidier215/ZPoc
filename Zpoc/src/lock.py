@@ -10,10 +10,11 @@ import getopt
 import sys
 import zoomeye
 import os
+import platform
 
 def handle_script(file_name=''):
     script_path = os.path.join(os.path.dirname(os.getcwd()), 'etc')
-    print script_path
+    ##print script_path
     if file_name == '':
         file_name = 'script.zpoc'
     file_name = os.path.join(script_path, file_name)
@@ -24,7 +25,7 @@ def handle_script(file_name=''):
         for line in file:
             # For Each Line
             line = line.rstrip('\n')
-            print 'Read {} : '.format(line_number) + line
+            ##print 'Read {} : '.format(line_number) + line
             line_number = line_number + 1
             # If line is empty, Skip it
             if line == '':
@@ -44,22 +45,16 @@ def handle_script(file_name=''):
             key = real_line[0:seperate].strip()
             value = real_line[seperate+1:].strip()
             if key == 'port':
-                print 'port is {}'.format(value)
                 result['port'] = value
             elif key == 'query':
-                print 'query is {}'.format(value)
                 result['query'] = value
             elif key == 'facets':
-                print 'facets is {}'.format(value)
                 result['facets'] = value
             elif key == 'poc':
-                print 'poc is {}'.format(value)
                 result['poc'] = value
             elif key == 'page':
-                print 'page is {}'.format(value)
                 result['page'] = int(value)
             elif key == 'search-type':
-                print 'search-type is {}'.format(value)
                 if value.lower() == 'web':
                     value = zoomeye.WEB_SEARCH
                 elif value.lower() == 'host':
@@ -75,7 +70,6 @@ def handle_script(file_name=''):
         print 'Read "{}" File Fail'.format(file_name)
         print e.message
         sys.exit(1)
-    print result
     return result
 
 def _help():
@@ -167,7 +161,7 @@ if __name__ == "__main__":
                 poc_name = tmp
     if dork == '':
         print 'facets is Empty'
-    print query, dork, page, search_type, poc_name, port
+    ##print query, dork, page, search_type, poc_name, port
     # User Interative
     name = raw_input('Enter Your ZoomEye Username: ')
     psw  = raw_input('Enter Your ZoomEye Password: ')
@@ -179,10 +173,18 @@ if __name__ == "__main__":
     z.login()
     # Search
     z.search(port, page, dork, poc_name, query, search_type)
+
+    sysattr = platform.system()
+    if sysattr == 'Windows':
+        os.system('pause')
+        os.system('cls')
+    else:
+        raw_input('Press Any Key to Continue')
+        os.system('clear')   
     while True:
-        print '''
-        1. Search The Same Paramter Again
-        2. Search The Same Paramter Except query and PoC-file
+        print ''' Choose One Of the Five Selections[1-5]
+        1. Search The Same Paramters Again
+        2. Search The Same Paramters Except "query" and "PoC-file"
         3. Search With other Paramters
         4. search With zpoc script file
         5. Exit 
@@ -225,6 +227,12 @@ if __name__ == "__main__":
             sys.exit(1)
         else:
             print 'Bad Choosing'
+        if sysattr == 'Windows':
+            os.system('pause')
+            os.system('cls')
+        else:
+            raw_input('Press Any Key to Continue')
+            os.system('clear')
     #print 'test'
     #print page, dork, poc_name, query       
     #z._search(port, page, dork, poc_name)
