@@ -4,7 +4,7 @@ ZPOC
     
 基于ZoomEye-Seebug-pocsuit的一键式自动化测试工具:-)
 -----------------------------------  
-Zpoc具备ZoomEye 和soudan的强大网络探索能力。并能够将数据存储指定文件。
+Zpoc具备ZoomEye 和shodan的强大网络探索能力。并能够将数据存储指定文件。
 
 
     说明：ZoomEye 的API搜索是有限制的，shodan的结果是要付费的。【邪恶脸】
@@ -29,7 +29,7 @@ Zpoc具备基于pocsuit的poc快速化开发框架，后面会有更多的框架
 
 	基于整个Zpoc测试的深入学习，实现一键化和学习化（开发ing）
 
-### 安装说明
+### 安装说明(Installation)
 - [安装说明](Zpoc/doc/install.md)	在 **doc/install.md**
 
 ####使用参数：
@@ -44,9 +44,14 @@ Zpoc具备基于pocsuit的poc快速化开发框架，后面会有更多的框架
 				   -r/--poc=    #PoC文件
 				   -o/--port=   #由前一版本留下，如果`-q`中有port数据，则会被-o选项替换
 				   -f/--script-file= #脚本文件，用来省略命令行参数填充
-	
-- 详细说明以及使用范例：
+
+> For English Details, See --help
+
+- (**Details**)详细说明以及使用范例：
 	- `python lock.py --help`
+	- **OR**
+	- `sudo chmod +x lock.py`
+	- `./lock.py --help`
 
 ### 相关平台框架： 
 > [Seebug ](https://www.seebug.org/)
