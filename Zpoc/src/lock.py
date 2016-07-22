@@ -93,6 +93,7 @@ Others:
         1. If you want a Iterative Handle, Just open Python Iterative Environment, And Import zoomeye,
         Call zoomeye.zoomeye_help() For More Usage
         2. If you want a Command Line Operation, See Examples
+        3. ZoomEye Manual Site:https://www.zoomeye.org/help/manual
             '''
     sys.exit(0)
 
@@ -162,6 +163,7 @@ if __name__ == "__main__":
     if dork == '':
         print 'facets is Empty'
     ##print query, dork, page, search_type, poc_name, port
+    #检查token，输入是否使用token，提示用户名，用户交互输入用户名密码
     # User Interative
     name = raw_input('Enter Your ZoomEye Username: ')
     psw  = raw_input('Enter Your ZoomEye Password: ')
